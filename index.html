@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Maison Verde • Restaurant</title>
+  <meta name="description" content="Fine dining restaurant landing page with menu, gallery, reservations, and contact info." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <style>
+    :root{
+      --bg:#101418; --panel:#151a20; --muted:#a7b0ba; --text:#eef2f6;
+      --accent:#9EE37D; --accent-2:#B6F09C; --danger:#ff6b6b;
+      --radius:16px; --shadow:0 18px 40px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    a{color:inherit;text-decoration:none}
+    img{max-width:100%;display:block}
+    .container{width:min(1200px,92vw);margin:0 auto}
+
+    /* Header */
+    .site-header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg, rgba(16,20,24,.92), rgba(16,20,24,.55) 70%, rgba(16,20,24,0));backdrop-filter:saturate(160%) blur(10px);box-shadow:0 2px 0 rgba(255,255,255,.05) inset, 0 10px 30px rgba(0,0,0,.35)}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.4px}
+    .brand .dot{width:10px;height:10px;border-radius:999px;background:var(--accent);box-shadow:0 0 18px var(--accent), 0 0 36px rgba(158,227,125,.35)}
+    .links{display:flex;gap:22px}
+    .links a{opacity:.9}
+    .links a:hover{color:var(--accent); text-shadow:0 0 12px rgba(158,227,125,.45)}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;background:var(--accent);color:#0a0a0a;font-weight:700;box-shadow:var(--shadow);border:0;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--text);border:1px solid #2a2f36}
+
+    /* Top slider (below header) */
+    .top-slider{position:relative;overflow:hidden;border-top:1px solid #1b2229;border-bottom:1px solid #1b2229;background:linear-gradient(180deg,#0f1418,#0e1317);height:220px}
+    .top-slider .track{display:flex;gap:16px;align-items:center;height:100%;width:max-content;animation:marquee 38s linear infinite}
+    .top-slider img{height:180px;width:auto;border-radius:14px;object-fit:cover;box-shadow:0 10px 24px rgba(0,0,0,.3);flex:0 0 auto}
+    .top-slider:hover .track{animation-play-state:paused}
+    @keyframes marquee{from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* Hero (CSS background slideshow – no <img>) */
+    .hero{position:relative;min-height:86vh;display:grid;place-items:center;overflow:hidden;text-align:center}
+    .hero .slides{position:absolute;inset:0;z-index:0}
+    .hero .slide{position:absolute;inset:0;background-position:center;background-size:cover;opacity:0;transform:scale(1.04);animation:fadeZoom 24s infinite}
+    .hero .slide:nth-child(1){background-image:url('https://images.unsplash.com/photo-1636041288177-bd1cf2d80a3c?q=80&w=1974&auto=format&fit=crop');animation-delay:0s}
+    .hero .slide:nth-child(2){background-image:url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1974&auto=format&fit=crop');animation-delay:8s}
+    .hero .slide:nth-child(3){background-image:url('https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1974&auto=format&fit=crop');animation-delay:16s}
+    @keyframes fadeZoom{0%{opacity:0;transform:scale(1.04)}8%{opacity:1}33%{opacity:1;transform:scale(1.1)}41%{opacity:0}100%{opacity:0}}
+
+    .hero .wrap{position:relative;z-index:1;display:grid;gap:18px;padding:90px 20px}
+    .eyebrow{display:inline-flex;gap:10px;align-items:center;justify-content:center;color:var(--muted);font-size:14px}
+    .chip{background:rgba(158,227,125,.1);border:1px solid rgba(158,227,125,.35);padding:4px 10px;border-radius:999px;color:var(--accent);backdrop-filter:blur(4px)}
+    .hero-title{font-family:'Playfair Display', serif;font-size:clamp(46px, 7vw, 92px);line-height:1.04;margin:0;font-weight:900;letter-spacing:.2px;background:linear-gradient(90deg,#ffffff 0%, #e9ffe0 45%, #b6f09c 90%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 10px 38px rgba(158,227,125,.28), 0 2px 0 rgba(0,0,0,.55)}
+    .hero .sub{color:#cdd3db;max-width:760px;margin:0 auto}
+    .hero .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+    .btn.neon{position:relative}
+    .btn.neon:after{content:"";position:absolute;inset:-6px;border-radius:14px;background:radial-gradient(40% 60% at 50% 50%, rgba(158,227,125,.35), transparent 70%);filter:blur(10px);z-index:-1;opacity:.9}
+
+    /* Sections */
+    section{padding:72px 0;border-top:1px solid #1e2229}
+    .section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:26px;gap:20px}
+    .section-head h2{margin:0;font-size:clamp(24px, 3.5vw, 36px)}
+    .section-head p{margin:0;color:var(--muted)}
+
+    /* About */
+    .about{display:grid;grid-template-columns:1.2fr .8fr;gap:36px}
+    .card{background:linear-gradient(180deg, #171a20, #121419);border:1px solid #242833;border-radius:var(--radius);box-shadow:var(--shadow)}
+    .card .content{padding:24px}
+    .about .photo{border-radius:var(--radius);overflow:hidden}
+    @media (max-width: 900px){.about{grid-template-columns:1fr}}
+
+    /* Menu Grid */
+    .menu-grid{display:grid;grid-template-columns:repeat(3, 1fr);gap:18px}
+    @media (max-width: 1000px){.menu-grid{grid-template-columns:repeat(2, 1fr)}}
+    @media (max-width: 640px){.menu-grid{grid-template-columns:1fr}}
+    .dish{display:flex;gap:12px;align-items:flex-start;padding:16px;border:1px solid #242833;border-radius:14px;background:#16191f}
+    .dish img{width:84px;height:84px;object-fit:cover;border-radius:12px}
+    .dish .title{font-weight:700}
+    .price{margin-left:auto;white-space:nowrap;color:var(--accent);font-weight:800}
+    .badge{font-size:12px;color:var(--muted)}
+
+    /* Gallery */
+    .gallery{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .gallery img{border-radius:14px;cursor:pointer;aspect-ratio:16/10;object-fit:cover;width:100%;height:auto;transition:transform .6s ease, box-shadow .3s ease}
+    .gallery img:hover{transform:scale(1.03)}
+
+    /* Reservations */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+    @media (max-width: 900px){.grid-2{grid-template-columns:1fr}}
+    form{display:grid;gap:14px}
+    .field{display:grid;gap:6px}
+    input,select,textarea{background:#121419;border:1px solid #262a33;color:var(--text);padding:12px;border-radius:12px}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent)}
+    .hint{color:var(--muted);font-size:13px}
+
+    .seatmap{background:#12171e;border:1px solid #262c36;border-radius:16px;padding:16px}
+    .seatmap svg{width:100%;height:auto;display:block}
+    .table{
+      fill:#1a212a;
+      stroke:#32404f;
+      stroke-width:2;
+      cursor:pointer;
+      transition:fill .2s ease, stroke .2s ease, filter .15s ease;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+    .table text{pointer-events:none;font-size:11px;fill:#9fb0c0}
+    .table:hover{filter:url(#glow)}
+    .table.selected{fill:#2e3d2b;stroke:#74d35a;filter:url(#glow)}
+    .table.occupied{fill:#b54b4b;cursor:not-allowed;stroke:#e07a7a}
+    .legend{display:flex;gap:12px;align-items:center;font-size:13px;color:var(--muted);margin-top:10px}
+    .badge-dot{width:12px;height:12px;border-radius:999px;display:inline-block}
+
+    /* Capacity board below the map */
+    .cap-board{
+      margin-top:12px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));
+      gap:10px;
+    }
+    .cap-chip{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      background:#121a22;
+      border:1px solid #2a3440;
+      border-radius:10px;
+      color:#cfe3d0;
+      font-size:13px;
+    }
+    .cap-chip .id{font-weight:700;color:#e8f7e3}
+    .cap-chip .cap{background:#1d2a20;border:1px solid #2e4634;border-radius:999px;padding:2px 8px;font-weight:800;color:#b9e9a6}
+    .cap-chip.occupied{opacity:.6}
+    .cap-chip.selected{box-shadow:0 0 0 2px #74d35a inset}
+
+    /* Capacity pill below each table */
+    .seatmap .cap-pill text{
+      fill:#cfe3d0;
+      font-size:10px;
+      font-weight:700;
+      pointer-events:none;
+    }
+    .seatmap .cap-pill rect{
+      fill:#1d2a20;
+      stroke:#2e4634;
+      stroke-width:1;
+      rx:7; ry:7;
+      opacity:.95;
+    }
+    .seatmap .cap-pill{ pointer-events:none; }
+
+    /* Hours & Contact */
+    .hours{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width: 900px){.hours{grid-template-columns:1fr}}
+    .row{display:flex;justify-content:space-between;padding:10px 12px;border:1px solid #242833;border-radius:10px}
+
+    /* Footer */
+    /* Full menu (overlay) – upgraded visuals */
+    #fullmenu{--card-bg:linear-gradient(180deg,#15181f,#11161b);--card-bd:#242b35}
+    #fullmenu .toolbar{display:flex;gap:12px;align-items:center;margin:10px 0 22px 0;flex-wrap:wrap}
+    #fullmenu .toolbar input[type="search"]{flex:1 1 260px;min-width:260px;background:#11161b;border:1px solid #2a313c;color:var(--text);padding:12px 14px;border-radius:12px}
+    #fullmenu .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;border:1px solid #2b3340;background:#0e141a;color:#c8d1db;cursor:pointer;font-size:13px}
+    #fullmenu .chip.active{border-color:rgba(158,227,125,.5);background:rgba(158,227,125,.08);color:#e6ffe0;box-shadow:0 0 16px rgba(158,227,125,.18)}
+    #fullmenu .menu-grid{grid-template-columns:repeat(2,minmax(360px,1fr));gap:20px}
+    @media (max-width: 900px){#fullmenu .menu-grid{grid-template-columns:1fr}}
+    #fullmenu article.dish{position:relative;overflow:hidden;align-items:center;padding:20px 24px;background:var(--card-bg);border:1px solid var(--card-bd);border-radius:16px;box-shadow:0 10px 26px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease}
+    #fullmenu article.dish::before{content:"";position:absolute;inset:-2px;border-radius:18px;padding:1px;background:linear-gradient(90deg, rgba(158,227,125,.35), rgba(182,240,156,.12), rgba(158,227,125,.35));-webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;opacity:.0;transition:opacity .25s ease}
+    #fullmenu article.dish:hover{transform:translateY(-3px);box-shadow:0 16px 44px rgba(0,0,0,.45)}
+    #fullmenu article.dish:hover::before{opacity:.8}
+    #fullmenu article.dish img{width:110px;height:110px;border-radius:14px;flex:0 0 auto}
+    #fullmenu article.dish .info{flex:1;min-width:0}
+    #fullmenu article.dish .title{font-size:20px}
+    #fullmenu article.dish .badge{color:#9fb0c0}
+    #fullmenu article.dish .price{background:var(--accent);color:#0b0f0c;padding:6px 12px;border-radius:999px;font-weight:900;box-shadow:0 0 18px rgba(158,227,125,.45)}
+    footer{padding:36px 0;border-top:1px solid #1e2229;color:#b8c0c9}
+    .foot{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:20px}
+    @media (max-width: 900px){.foot{grid-template-columns:1fr}}
+    .small{font-size:13px;color:#96a0ab}
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <div class="brand"><span class="dot"></span> Maison Verde</div>
+      <nav class="links">
+        <a href="#about">About</a>
+        <a href="#" id="openFullMenu">Menu</a>
+        <a href="#gallery">Gallery</a>
+        <a href="#reserve">Reservations</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <a class="btn" href="#reserve" style="margin-left:12px">Book a Table</a>
+    </div>
+  </header>
+
+  <div class="top-slider">
+    <div class="container" style="height:100%">
+      <div class="track">
+        <img loading="lazy" decoding="async"
+             src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1600&auto=format&fit=crop"
+             data-fallback="https://images.unsplash.com/photo-1498654200943-1088dd4438ae?q=80&w=1600&auto=format&fit=crop"
+             alt="ribs">
+
+        <img loading="lazy" decoding="async"
+             src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=1600&auto=format&fit=crop"
+             data-fallback="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=1600&auto=format&fit=crop"
+             alt="burrata cheese appetizer">
+
+        <img loading="lazy" decoding="async"
+             src="https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?q=80&w=1600&auto=format&fit=crop"
+             data-fallback-list="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1600&auto=format&fit=crop, https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1600&auto=format&fit=crop"
+             alt="heritage tomato salad">
+
+        <img loading="lazy" decoding="async"
+             src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1600&auto=format&fit=crop"
+             data-fallback="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1600&auto=format&fit=crop"
+             alt="fish main course">
+
+        <img loading="lazy" decoding="async"
+             src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1600&auto=format&fit=crop"
+             data-fallback="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1600&auto=format&fit=crop"
+             alt="dining room">
+
+        <img loading="lazy" decoding="async"
+             src="https://images.unsplash.com/photo-1525755662778-989d0524087e?q=80&w=1600&auto=format&fit=crop"
+             data-fallback="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=1600&auto=format&fit=crop"
+             alt="risotto">
+      </div>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="slides">
+      <div class="slide"></div>
+      <div class="slide"></div>
+      <div class="slide"></div>
+    </div>
+    <div class="wrap container">
+      <span class="eyebrow"><span class="chip">Modern European</span> since 2012 • Belgrade</span>
+      <h1 class="hero-title">Seasonal Cuisine, <span class="accent">Crafted With Care</span></h1>
+      <p class="sub">A boutique dining experience where local produce meets modern technique. Tasting menus, curated wines, and a warm ambiance for every occasion.</p>
+      <div class="cta">
+        <a class="btn neon" href="#reserve">Reserve Now</a>
+        <a class="btn ghost" href="#menu">View Menu</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="container about">
+      <div class="card">
+        <div class="content">
+          <div class="section-head">
+            <h2>About the Restaurant</h2>
+            <p>Fresh. Local. Refined.</p>
+          </div>
+          <p>Maison Verde is a chef-driven restaurant focused on seasonal ingredients and refined comfort dishes. Our kitchen blends classic techniques with a modern aesthetic, delivering a menu that evolves with the market.</p>
+          <p>We offer a 5-course tasting menu, artisanal desserts, and a curated wine list with a focus on natural and biodynamic producers.</p>
+          <div class="hours" style="margin-top:18px">
+            <div class="row"><span>Mon–Thu</span><strong>12:00–22:00</strong></div>
+            <div class="row"><span>Fri–Sat</span><strong>12:00–23:30</strong></div>
+            <div class="row"><span>Sunday</span><strong>Closed</strong></div>
+            <div class="row"><span>Kitchen Break</span><strong>16:00–18:00</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="photo">
+        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop" alt="Dining room" />
+      </div>
+    </div>
+  </section>
+
+  <section id="menu">
+    <div class="container">
+      <div class="section-head">
+        <h2>Signature Dishes</h2>
+        <p>Sample picks from our current seasonal menu.</p>
+      </div>
+      <div class="menu-grid">
+        <article class="dish"><img src="https://images.unsplash.com/photo-1526312426976-593c542dcecf?q=80&w=1170&auto=format&fit=crop"
+             alt="Starter"
+             data-fallback-list="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=1170&auto=format&fit=crop, https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=1170&auto=format&fit=crop" /><div class="info"><div class="title">Burrata, roasted tomatoes, basil oil</div><div class="badge">vegetarian</div></div><div class="price">1850 DIN</div></article>
+<img src="https://images.unsplash.com/photo-1604908176869-d6f4de3d8ef2?q=80&w=1170&auto=format&fit=crop"
+     alt="Seared sea bass"
+     data-fallback-list="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1170&auto=format&fit=crop, https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=1170&auto=format&fit=crop" />        <article class="dish"><img src="https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=1170&auto=format&fit=crop" alt="Main" /><div class="info"><div class="title">Beef tagliata, rocket, shaved parmesan</div><div class="badge">popular</div></div><div class="price">2100 DIN</div></article>
+        <article class="dish"><img src="https://images.unsplash.com/photo-1448043552756-e747b7a2b2b8?q=80&w=1170&auto=format&fit=crop" alt="Pasta" /><div class="info"><div class="title">Truffle pappardelle, pecorino</div><div class="badge">vegetarian</div></div><div class="price">1650 DIN</div></article>
+        <article class="dish"><img src="https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?q=80&w=1170&auto=format&fit=crop" alt="Dessert" /><div class="info"><div class="title">Dark chocolate tart, sea salt, creme fraiche</div><div class="badge">contains nuts</div></div><div class="price">800 DIN</div></article>
+        <article class="dish"><img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1170&auto=format&fit=crop"
+             alt="Salad"
+             data-fallback-list="https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?q=80&w=1170&auto=format&fit=crop, https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=1170&auto=format&fit=crop" /><div class="info"><div class="title">Heritage tomato salad, whipped ricotta</div><div class="badge">seasonal</div></div><div class="price">950 DIN</div></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery">
+    <div class="container">
+      <div class="section-head">
+        <h2>Gallery</h2>
+        <p>Ambience and plates from the dining room.</p>
+      </div>
+      <div class="gallery">
+        <img src="https://images.unsplash.com/photo-1550507992-eb63ffee0847?q=80&w=1600&auto=format&fit=crop" alt="Signature ribs" data-lg>
+        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1600&auto=format&fit=crop" alt="Dining room" data-lg>
+        <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=1600&auto=format&fit=crop" alt="Pasta plate" data-lg>
+        <img class="animate-pan" src="https://images.unsplash.com/photo-1525755662778-989d0524087e?q=80&w=1600&auto=format&fit=crop" alt="Seafood risotto" data-lg>
+      </div>
+    </div>
+  </section>
+
+  <section id="reserve">
+    <div class="container">
+      <div class="section-head">
+        <h2>Reservations</h2>
+        <p>Book your table in under a minute.</p>
+      </div>
+      <div class="grid-2">
+        <form id="reserveForm" class="card content" novalidate>
+          <div class="field"><label for="name">Full name</label><input id="name" name="name" type="text" placeholder="John Doe" required></div>
+          <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel" placeholder="+381 64 123 4567" required></div>
+          <div class="field"><label for="date">Date</label><input id="date" name="date" type="date" required></div>
+          <div class="field"><label for="time">Time</label><input id="time" name="time" type="time" required></div>
+          <div class="field"><label for="guests">Guests</label>
+            <select id="guests" name="guests" required>
+              <option value="" disabled selected>Select guests</option>
+              <option>1</option><option>2</option><option>3</option><option>4</option>
+              <option>5</option><option>6</option><option>7</option><option>8+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="notes">Notes (optional)</label>
+            <textarea id="notes" name="notes" rows="3" placeholder="Allergies, occasion, preferences..."></textarea>
+            <div class="hint">We will confirm by phone within 15 minutes.</div>
+          </div>
+          <button class="btn" type="submit">Send request</button>
+          <p id="formMsg" class="hint" role="status" aria-live="polite"></p>
+        </form>
+        <div class="card"><div class="content">
+          <h3 style="margin-top:0">Choose Your Table</h3>
+          <div class="seatmap">
+            <svg viewBox="0 0 520 300" aria-label="Restaurant seating plan">
+              <defs>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                  <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+
+              <!-- Room outline -->
+              <rect x="6" y="6" width="508" height="288" rx="10" ry="10" fill="#0f1419" stroke="#2b3440"/>
+
+              <!-- Bar area (top) -->
+              <rect x="20" y="20" width="480" height="28" rx="6" fill="#141a20" stroke="#2b3440"/>
+
+              <!-- Booths (right side) -->
+              <g>
+                <g class="table occupied" data-id="BTH1" data-capacity="4" data-table transform="translate(440,70)">
+                  <rect width="56" height="30" rx="6"></rect><text x="28" y="20" text-anchor="middle">BTH1</text>
+                </g>
+                <g class="table" data-id="BTH2" data-capacity="4" data-table transform="translate(440,110)">
+                  <rect width="56" height="30" rx="6"></rect><text x="28" y="20" text-anchor="middle">BTH2</text>
+                </g>
+                <g class="table" data-id="BTH3" data-capacity="4" data-table transform="translate(440,150)">
+                  <rect width="56" height="30" rx="6"></rect><text x="28" y="20" text-anchor="middle">BTH3</text>
+                </g>
+                <g class="table occupied" data-id="BTH4" data-capacity="4" data-table transform="translate(440,190)">
+                  <rect width="56" height="30" rx="6"></rect><text x="28" y="20" text-anchor="middle">BTH4</text>
+                </g>
+                <g class="table" data-id="BTH5" data-capacity="4" data-table transform="translate(440,230)">
+                  <rect width="56" height="30" rx="6"></rect><text x="28" y="20" text-anchor="middle">BTH5</text>
+                </g>
+              </g>
+
+              <!-- Round tables (center) -->
+              <g>
+                <g class="table" data-id="T1" data-capacity="4" data-table transform="translate(110,95)">
+                  <circle cx="0" cy="0" r="20"></circle><text x="0" y="4" text-anchor="middle">T1</text>
+                </g>
+                <g class="table" data-id="T2" data-capacity="4" data-table transform="translate(190,95)">
+                  <circle cx="0" cy="0" r="20"></circle><text x="0" y="4" text-anchor="middle">T2</text>
+                </g>
+                <g class="table occupied" data-id="T3" data-capacity="2" data-table transform="translate(270,95)">
+                  <circle cx="0" cy="0" r="20"></circle><text x="0" y="4" text-anchor="middle">T3</text>
+                </g>
+                <g class="table" data-id="T4" data-capacity="2" data-table transform="translate(350,95)">
+                  <circle cx="0" cy="0" r="20"></circle><text x="0" y="4" text-anchor="middle">T4</text>
+                </g>
+
+                <g class="table" data-id="T5" data-capacity="4" data-table transform="translate(110,165)">
+                  <circle cx="0" cy="0" r="20"></circle><text x="0" y="4" text-anchor="middle">T5</text>
+                </g>
+                <g class="table" data-id="T6" data-capacity="4" data-table transform="translate(190,165)">
+                  <circle cx="0" cy="0" r="20"></circle><text x="0" y="4" text-anchor="middle">T6</text>
+                </g>
+                <g class="table" data-id="T7" data-capacity="2" data-table transform="translate(270,165)">
+                  <circle cx="0" cy="0" r="20"></circle><text x="0" y="4" text-anchor="middle">T7</text>
+                </g>
+                <g class="table" data-id="T8" data-capacity="2" data-table transform="translate(350,165)">
+                  <circle cx="0" cy="0" r="20"></circle><text x="0" y="4" text-anchor="middle">T8</text>
+                </g>
+              </g>
+
+              <g>
+                <g class="table" data-id="G1" data-capacity="2" data-table transform="translate(60,230)">
+                  <rect x="-22" y="-14" width="44" height="28" rx="6"></rect><text x="0" y="4" text-anchor="middle">G1</text>
+                </g>
+                <g class="table occupied" data-id="G2" data-capacity="2" data-table transform="translate(120,230)">
+                  <rect x="-22" y="-14" width="44" height="28" rx="6"></rect><text x="0" y="4" text-anchor="middle">G2</text>
+                </g>
+                <g class="table" data-id="G3" data-capacity="4" data-table transform="translate(180,230)">
+                  <rect x="-28" y="-16" width="56" height="32" rx="6"></rect><text x="0" y="4" text-anchor="middle">G3</text>
+                </g>
+              </g>
+            </svg>
+            <div class="legend">
+              <span class="badge-dot" style="background:#1a212a;border:2px solid #32404f"></span> Free
+              <span class="badge-dot" style="background:#b54b4b"></span> Occupied
+              <span class="badge-dot" style="background:var(--accent)"></span> Selected
+            </div>
+            <div class="hint" id="seatCount">Selected: 0</div>
+            <input type="hidden" name="selected_seats" id="selectedSeats" value="">
+            <div id="capacityBoard" class="cap-board" aria-label="Table capacities"></div>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container">
+      <div class="section-head"><h2>Find Us</h2><p>Get directions, call, or write to us.</p></div>
+      <div class="grid-2">
+        <div class="card"><div class="content">
+          <h3 style="margin-top:0">Contact</h3>
+          <p><strong>Phone:</strong> <a href="tel:+381641234567">+381 64 123 4567</a><br><strong>Email:</strong> <a href="mailto:hello@maisonverde.rs">hello@maisonverde.rs</a></p>
+          <h3>Address</h3><p>Kralja Petra 10, Stari Grad, Belgrade</p>
+          <h3>Social</h3><p><a href="#" aria-label="Instagram">Instagram</a> • <a href="#" aria-label="Facebook">Facebook</a></p>
+        </div></div>
+        <div class="card"><div class="content" style="padding:0"><iframe title="Map" src="https://www.openstreetmap.org/export/embed.html?bbox=20.445%2C44.810%2C20.470%2C44.825&layer=mapnik" style="width:100%;height:360px;border:0;border-radius:16px"></iframe></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Full Menu Overlay -->
+  <div id="fullmenu" style="display:none;position:fixed;inset:0;z-index:60;background:rgba(10,12,15,.96);backdrop-filter:blur(10px);overflow:auto">
+    <div class="container" style="padding:28px 0 60px 0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h2 style="margin:0">Full Menu</h2><button id="closeFullMenu" class="btn ghost">Close</button></div>
+      <p class="small" style="margin-top:0;color:var(--muted)">20 signature dishes • ingredients & photos</p>
+      <div class="toolbar">
+        <input id="menuSearch" type="search" placeholder="Search dishes or ingredients…">
+        <span class="chip active" data-filter="all">All</span>
+        <span class="chip" data-filter="starter">Starters</span>
+        <span class="chip" data-filter="main">Mains</span>
+        <span class="chip" data-filter="dessert">Desserts</span>
+        <span class="chip" data-filter="veggie">Veggie</span>
+      </div>
+      <div class="menu-grid" style="grid-template-columns:repeat(2,1fr)">
+        <!-- Starters -->
+        <article class="dish" data-cat="starter veggie">
+          <img src="https://images.unsplash.com/photo-1526312426976-593c542dcecf?q=80&w=800&auto=format&fit=crop"
+               alt="Burrata"
+               data-fallback-list="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1467003909585-2f8a72700288?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Burrata</div><div class="badge">tomatoes • basil oil • sourdough</div></div><div class="price">9.50</div>
+        </article>
+
+        <article class="dish" data-cat="starter">
+          <img src="https://images.unsplash.com/photo-1551183053-bf91a1d81141?q=80&w=800&auto=format&fit=crop"
+               alt="Tuna Tartare"
+               data-fallback-list="https://images.unsplash.com/photo-1546069901-eacef0df6022?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1533777324565-a040eb52fac1?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Tuna Tartare</div><div class="badge">avocado • sesame • soy</div></div><div class="price">12.00</div>
+        </article>
+
+        <article class="dish" data-cat="starter veggie">
+          <img src="https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?q=80&w=800&auto=format&fit=crop"
+               alt="Heritage Tomato Salad"
+               data-fallback-list="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1556761175-b413da4baf72?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Heritage Tomato Salad</div><div class="badge">whipped ricotta • basil • olive oil</div></div><div class="price">8.50</div>
+        </article>
+
+        <!-- Mains -->
+        <article class="dish" data-cat="main veggie">
+          <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=800&auto=format&fit=crop" alt="Truffle Pappardelle" />
+          <div class="info"><div class="title">Truffle Pappardelle</div><div class="badge">black truffle • pecorino • butter</div></div><div class="price">14.00</div>
+        </article>
+
+        <article class="dish" data-cat="main">
+          <img src="https://images.unsplash.com/photo-1512058564366-18510be2db19?q=80&w=800&auto=format&fit=crop" alt="Beef Tagliata" />
+          <div class="info"><div class="title">Beef Tagliata</div><div class="badge">arugula • parmesan • balsamic</div></div><div class="price">19.50</div>
+        </article>
+
+        <article class="dish" data-cat="main">
+          <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=800&auto=format&fit=crop"
+               alt="Seared Sea Bass"
+               data-fallback-list="https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Seared Sea Bass</div><div class="badge">fennel • citrus beurre blanc</div></div><div class="price">18.00</div>
+        </article>
+
+        <article class="dish" data-cat="main">
+          <img src="https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?q=80&w=800&auto=format&fit=crop"
+               alt="Grilled Octopus"
+               data-fallback-list="https://images.unsplash.com/photo-1481931715705-36f05f3d30b4?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1562967914-608f82629710?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Grilled Octopus</div><div class="badge">paprika • lemon • potato</div></div><div class="price">21.00</div>
+        </article>
+
+        <article class="dish" data-cat="main">
+          <img src="https://images.unsplash.com/photo-1529042410759-befb1204b468?q=80&w=800&auto=format&fit=crop" alt="Lamb Shank" />
+          <div class="info"><div class="title">Slow-braised Lamb Shank</div><div class="badge">polenta • rosemary jus</div></div><div class="price">22.00</div>
+        </article>
+
+        <article class="dish" data-cat="main">
+          <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=800&auto=format&fit=crop" alt="Chicken Supreme" />
+          <div class="info"><div class="title">Chicken Supreme</div><div class="badge">asparagus • morel sauce</div></div><div class="price">16.00</div>
+        </article>
+
+        <article class="dish" data-cat="main veggie">
+          <img src="https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=800&auto=format&fit=crop"
+               alt="Mushroom Risotto"
+               data-fallback-list="https://images.unsplash.com/photo-1604908176869-d6f4de3d8ef2?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1514516870926-20598953d7a3?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Mushroom Risotto</div><div class="badge">porcini • parmesan • thyme</div></div><div class="price">13.50</div>
+        </article>
+
+        <article class="dish" data-cat="main veggie">
+          <img src="https://images.unsplash.com/photo-1542281286-9e0a16bb7366?q=80&w=800&auto=format&fit=crop" alt="Margherita Pizza" />
+          <div class="info"><div class="title">Margherita Pizza</div><div class="badge">san marzano • fior di latte • basil</div></div><div class="price">11.50</div>
+        </article>
+
+        <article class="dish" data-cat="main veggie">
+          <img src="https://images.unsplash.com/photo-1604908812363-1d7d948e5784?q=80&w=800&auto=format&fit=crop"
+               alt="Gnocchi Gorgonzola"
+               data-fallback-list="https://images.unsplash.com/photo-1604908800774-14551f9d6f01?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1603072385530-8f9f7b82d49f?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Gnocchi Gorgonzola</div><div class="badge">spinach • walnut crumble</div></div><div class="price">12.50</div>
+        </article>
+
+        <article class="dish" data-cat="main">
+          <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=800&auto=format&fit=crop" alt="Country Breakfast" />
+          <div class="info"><div class="title">Country Breakfast</div><div class="badge">eggs • sausage • potatoes</div></div><div class="price">11.00</div>
+        </article>
+
+        <article class="dish" data-cat="main">
+          <img src="https://images.unsplash.com/photo-1604908176869-d6f4de3d8ef2?q=80&w=800&auto=format&fit=crop"
+               alt="Seafood Risotto"
+               data-fallback-list="https://images.unsplash.com/photo-1548943487-a2e4e43b4853?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1544510802-0a2a7b41e4d7?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Seafood Risotto</div><div class="badge">shrimp • calamari • saffron</div></div><div class="price">16.50</div>
+        </article>
+
+        <!-- Desserts -->
+        <article class="dish" data-cat="dessert">
+          <img src="https://images.unsplash.com/photo-1455619452474-d2be8b1e70cd?q=80&w=800&auto=format&fit=crop" alt="Dark Chocolate Tart" />
+          <div class="info"><div class="title">Dark Chocolate Tart</div><div class="badge">sea salt • creme fraiche</div></div><div class="price">7.00</div>
+        </article>
+
+        <article class="dish" data-cat="dessert">
+          <img src="https://images.unsplash.com/photo-1606890737304-57a1ca8a5c7b?q=80&w=800&auto=format&fit=crop"
+               alt="Cheesecake"
+               data-fallback-list="https://images.unsplash.com/photo-1551024709-8f23befc6cf7?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1605478031211-30c2d5ae0491?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Baked Cheesecake</div><div class="badge">vanilla • berry coulis</div></div><div class="price">6.50</div>
+        </article>
+
+        <article class="dish" data-cat="dessert">
+          <img src="https://images.unsplash.com/photo-1604908554041-1b5e7701261d?q=80&w=800&auto=format&fit=crop"
+               alt="Tiramisu"
+               data-fallback-list="https://images.unsplash.com/photo-1587314168485-3236d6710814?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1523986371872-9d3ba2e2e2cc?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Classic Tiramisu</div><div class="badge">mascarpone • espresso • cacao</div></div><div class="price">6.50</div>
+        </article>
+
+        <article class="dish" data-cat="dessert">
+          <img src="https://images.unsplash.com/photo-1603816259578-9a3e12c90eb2?q=80&w=800&auto=format&fit=crop"
+               alt="Panna Cotta"
+               data-fallback-list="https://images.unsplash.com/photo-1608740847178-3b2b5a793b77?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1532635076-1bf1f9b7c42d?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Panna Cotta</div><div class="badge">vanilla • berry gel</div></div><div class="price">6.00</div>
+        </article>
+
+        <article class="dish" data-cat="dessert">
+          <img src="https://images.unsplash.com/photo-1600891964599-f61ba0e24092?q=80&w=800&auto=format&fit=crop"
+               alt="Crème brûlée"
+               data-fallback-list="https://images.unsplash.com/photo-1562440499-64b8c89f5b45?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1617191519105-5c2e1f908db8?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Crème Brûlée</div><div class="badge">madagascar vanilla • caramel top</div></div><div class="price">6.50</div>
+        </article>
+
+        <article class="dish" data-cat="dessert veggie">
+          <img src="https://images.unsplash.com/photo-1534080564583-6be75777b70a?q=80&w=800&auto=format&fit=crop"
+               alt="Fruit Sorbet"
+               data-fallback-list="https://images.unsplash.com/photo-1560807707-8cc77767d783?q=80&w=800&auto=format&fit=crop, https://images.unsplash.com/photo-1505253216365-9a9ae3bcb57c?q=80&w=800&auto=format&fit=crop" />
+          <div class="info"><div class="title">Seasonal Fruit Sorbet</div><div class="badge">mango • raspberry • lemon</div></div><div class="price">5.50</div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container foot">
+      <div><div class="brand" style="margin-bottom:10px"><span class="dot"></span> Maison Verde</div><div class="small">Modern seasonal cuisine in the heart of Belgrade. © <span id="year"></span> Maison Verde.</div></div>
+      <div><div class="small">Privacy Policy</div><div class="small">Allergens & Ingredients</div></div>
+      <div><div class="small">Designed by Nemanja Nikitovic</div><div class="small">BlackBoxTesting</div></div>
+    </div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" aria-modal="true" role="dialog" style="position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;place-items:center;padding:20px"><img alt="Expanded" id="lightboxImg" style="max-width:96vw;max-height:86vh;border-radius:16px"/></div>
+
+  <script>
+    // Robust image fallback for slider and thumbs
+    (function(){
+      const NEUTRAL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="#1b232b"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#728091" font-family="Inter,Arial" font-size="20">image unavailable</text></svg>'
+      );
+      document.querySelectorAll('img[data-fallback], img[data-fallback-list]').forEach(img=>{
+        const single = img.getAttribute('data-fallback');
+        const list = (img.getAttribute('data-fallback-list') || '').split(',').map(s=>s.trim()).filter(Boolean);
+        const queue = single ? [single, ...list] : list;
+        let i = 0;
+        img.addEventListener('error', () => {
+          if (i < queue.length) {
+            img.src = queue[i++];
+          } else {
+            img.removeAttribute('data-fallback');
+            img.removeAttribute('data-fallback-list');
+            img.src = NEUTRAL;
+          }
+        });
+      });
+    })();
+    // Duplicate top-slider items for seamless loop
+    (function(){
+      const track=document.querySelector('.top-slider .track');
+      if(track&&track.children.length){ track.innerHTML += track.innerHTML; }
+    })();
+
+    // Smooth scroll for in-page links
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click',e=>{
+        const id=a.getAttribute('href');
+        if(id && id.length>1){ e.preventDefault(); document.querySelector(id)?.scrollIntoView({behavior:'smooth',block:'start'}); }
+      });
+    });
+
+    // Lightbox
+    (function(){
+      const lb=document.getElementById('lightbox');
+      const img=document.getElementById('lightboxImg');
+      document.querySelectorAll('[data-lg]').forEach(el=>{
+        el.addEventListener('click',()=>{ lb.style.display='grid'; img.src=el.src; });
+      });
+      lb.addEventListener('click',()=>{ lb.style.display='none'; img.src=''; });
+    })();
+
+        // ==== EmailJS – reservation handler ====
+    (function(){
+      const form = document.getElementById('reserveForm');
+      const msg  = document.getElementById('formMsg');
+      const hiddenSeats = document.getElementById('selectedSeats');
+
+      // ---- CONFIG: EmailJS v3 ključevi ----
+      const EMAILJS_PUBLIC_KEY  = 'ZiFZzrExEkxrpAAbf';
+      const EMAILJS_SERVICE_ID  = 'service_dc21acx';
+      const EMAILJS_TEMPLATE_ID = 'template_181px1r';
+
+      
+      try {
+        if (window.emailjs && typeof emailjs.init === 'function') {
+          emailjs.init(EMAILJS_PUBLIC_KEY);
+          console.log('[EmailJS] init OK');
+        }
+      } catch (e) {
+        console.warn('[EmailJS] init failed', e);
+      }
+
+      if (!form) return;
+
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+
+        if(!form.checkValidity()){
+          msg.textContent = 'Please fill all required fields.';
+          msg.style.color = 'var(--danger)';
+          return;
+        }
+
+        const data = Object.fromEntries(new FormData(form));
+        data.selected_tables = hiddenSeats?.value || '';
+
+        const templateParams = {
+          subject: `New reservation — ${data.name} (${data.guests} guests)`,
+          customer_name: data.name,
+          phone: data.phone,
+          date: data.date,
+          time: data.time,
+          guests: data.guests,
+          selected_tables: data.selected_tables,
+          notes: data.notes || '-',
+          // opcionalno: ako u šablonu koristiš {{email}}
+          email: 'nemanjanikitovic1@gmail.com'
+        };
+
+        msg.textContent = 'Sending…';
+        msg.style.color = '#9fb0c0';
+
+        try {
+          if (!window.emailjs) throw new Error('EmailJS not loaded');
+
+         
+          const res = await emailjs.send(
+            EMAILJS_SERVICE_ID,
+            EMAILJS_TEMPLATE_ID,
+            templateParams
+          );
+
+          console.log('[EmailJS] response', res);
+          if (!res || res.status !== 200) throw new Error('EmailJS non-200 status');
+
+          msg.textContent = 'Thanks! Your reservation request was sent. We will call you shortly to confirm.';
+          msg.style.color = 'var(--accent)';
+          form.reset();
+          if (hiddenSeats) hiddenSeats.value = '';
+        } catch (err) {
+          console.error('[EmailJS] send failed:', err);
+          msg.textContent = 'We could not send the email right now. Please try again or call us at +381 64 123 4567.';
+          msg.style.color = 'var(--danger)';
+        }
+      });
+    })();
+
+    // Seat map / table selection logic
+    (function(){
+      const tables = document.querySelectorAll('.seatmap .table');
+      const count = document.getElementById('seatCount');
+      const hidden = document.getElementById('selectedSeats');
+      const selected = new Set();
+
+      tables.forEach(t=>{
+        t.addEventListener('click', ()=>{
+          if(t.classList.contains('occupied')) return;
+          const id = t.getAttribute('data-id');
+          if(t.classList.toggle('selected')) selected.add(id); else selected.delete(id);
+          const arr = [...selected];
+          if(count) count.textContent = `Selected: ${arr.length} (${arr.join(', ')})`;
+          if(hidden) hidden.value = arr.join(',');
+          const chip = document.querySelector(`.cap-board .cap-chip[data-id="${id}"]`);
+          if(chip) chip.classList.toggle('selected', t.classList.contains('selected'));
+        });
+        // improve focus & keyboard
+        t.setAttribute('tabindex','0');
+        t.addEventListener('keydown', (e)=>{
+          if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); t.click(); }
+        });
+      });
+    })();
+
+    // Capacity board (below map)
+    (function(){
+      const board = document.getElementById('capacityBoard');
+      const svg = document.querySelector('.seatmap svg');
+      if(!board || !svg) return;
+      const tables = svg.querySelectorAll('.table');
+      board.innerHTML = '';
+      tables.forEach(t=>{
+        const id = t.getAttribute('data-id');
+        const cap = t.getAttribute('data-capacity') || '2';
+        const chip = document.createElement('div');
+        chip.className = 'cap-chip' + (t.classList.contains('occupied') ? ' occupied' : '');
+        chip.setAttribute('data-id', id);
+        chip.innerHTML = `<span class="id">${id}</span><span class="cap">${cap} seats</span>`;
+        // click on chip toggles table selection (if free)
+        chip.addEventListener('click', ()=>{
+          if(t.classList.contains('occupied')) return;
+          t.dispatchEvent(new Event('click'));
+        });
+        board.appendChild(chip);
+      });
+      // sync UI when table selection changes
+      document.querySelectorAll('.seatmap .table').forEach(t=>{
+        t.addEventListener('click', ()=>{
+          const id = t.getAttribute('data-id');
+          const chip = board.querySelector(`.cap-chip[data-id="${id}"]`);
+          if(chip) chip.classList.toggle('selected', t.classList.contains('selected'));
+        });
+      });
+    })();
+
+    // Full menu overlay
+    (function(){
+      const openBtn = document.getElementById('openFullMenu');
+      const overlay = document.getElementById('fullmenu');
+      const closeBtn = document.getElementById('closeFullMenu');
+      if(openBtn && overlay && closeBtn){
+        openBtn.addEventListener('click',(e)=>{ e.preventDefault(); overlay.style.display='block'; document.body.style.overflow='hidden'; });
+        closeBtn.addEventListener('click',()=>{ overlay.style.display='none'; document.body.style.overflow='auto'; });
+      }
+    })();
+
+    // Full menu filtering + search
+    (function(){
+      const overlay = document.getElementById('fullmenu');
+      if(!overlay) return;
+      const chips = overlay.querySelectorAll('.chip[data-filter]');
+      const input = overlay.querySelector('#menuSearch');
+      const items = Array.from(overlay.querySelectorAll('.menu-grid > .dish'));
+      let active = 'all', query = '';
+
+      function apply(){
+        const q = query.trim().toLowerCase();
+        items.forEach(it=>{
+          const cats = (it.getAttribute('data-cat') || '').toLowerCase();
+          const text = it.innerText.toLowerCase();
+          const matchCat = active === 'all' || cats.includes(active);
+          const matchText = !q || text.includes(q);
+          it.style.display = (matchCat && matchText) ? '' : 'none';
+        });
+      }
+      chips.forEach(ch=>{
+        ch.addEventListener('click', ()=>{
+          chips.forEach(c=>c.classList.remove('active'));
+          ch.classList.add('active');
+          active = ch.getAttribute('data-filter');
+          apply();
+        });
+      });
+      input?.addEventListener('input', (e)=>{ query = e.target.value; apply(); });
+    })();
+
+    // Year
+    document.getElementById('year').textContent=new Date().getFullYear();
+  </script>
+</body>
+</html>
